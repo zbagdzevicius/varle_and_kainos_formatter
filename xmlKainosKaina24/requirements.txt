@@ -1,0 +1,4 @@
+scrapy
+selenium
+pypiwin32
+Twisted
