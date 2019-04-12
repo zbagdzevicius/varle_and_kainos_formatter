@@ -3,6 +3,7 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 import os
 import hashlib
+import re
 
 
 class MySpider(scrapy.Spider):
@@ -33,6 +34,8 @@ class MySpider(scrapy.Spider):
         title = response.css(
             'h1.product-title.entry-title::text').extract_first().strip()
         description = response.css('#tab-description').extract_first()
+        description = self.strip_tags(description)
+        description = description.strip()
         wrongPrice = response.css(
             'div.price-wrapper p.price.product-page-price del span::text')
 
@@ -62,7 +65,7 @@ class MySpider(scrapy.Spider):
             'id': item_id,
             'categories': {'category': f'<![CDATA[{category_name}]]>'},
             'title': f'<![CDATA[{title}]]>',
-            'description': f'<![CDATA[{description.strip()}]]>',
+            'description': f'<![CDATA[ {description} ]]>',
             'price': float(price),
             'prime_costs': int(float(price)*0.8),
             'images': {'image': f'<![CDATA[{image_url}]]>'},
@@ -74,6 +77,12 @@ class MySpider(scrapy.Spider):
         for char in bad_chars:
             string = string.replace(char, '').strip()
         return string
+    
+    def strip_tags(self, data):
+        p = re.compile(
+            r"""<[^<]+?>"""
+        )
+        return p.sub("", data)
 
 
 fname = "varle.xml"
